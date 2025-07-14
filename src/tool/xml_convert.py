@@ -39,7 +39,7 @@ def convert_xml(path):
         box_height = (ymax - ymin) / 512
 
         # 假設只有一個類別 class=0
-        objects.append(f"0 {x_center:.6f} {y_center:.6f} {box_width:.6f} {box_height:.6f}")
+        objects.append(f"1 {x_center:.6f} {y_center:.6f} {box_width:.6f} {box_height:.6f}")
     
     return objects
 
@@ -51,9 +51,12 @@ def run():
             base = os.path.splitext(file)[0]
             print(base)
             if base not in xml_basenames:
+                temp_obj = []
+                temp_obj.append(f"0 0 0 0 0")
                 txt_path = os.path.join(output_folder, base + ".txt")
                 with open(txt_path, "w") as f:
-                    pass  # 建立空白 txt
+                    for line in temp_obj:
+                        f.write(line + "\n")
                 count += 1
             else:
                 txt_path = os.path.join(output_folder, base + ".txt")
