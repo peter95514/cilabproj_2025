@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 
-xml_folder = os.path.join(root, "data/xml")
+xml_folder = os.path.join(root, "data/xml_temp")
 png_folder = os.path.join(root, "data/temp")
 output_folder = os.path.join(root, "data/output_temp")
 
@@ -44,12 +44,12 @@ def convert_xml(path):
     return objects
 
 def run():
-
     count = 0
     for file in sorted(os.listdir(png_folder)):
         if file.lower().endswith(".png"):
             base = os.path.splitext(file)[0]
-            print(base)
+            print([base]+[count])
+            count += 1
             if base not in xml_basenames:
                 temp_obj = []
                 temp_obj.append(f"0 0 0 0 0")
@@ -57,12 +57,11 @@ def run():
                 with open(txt_path, "w") as f:
                     for line in temp_obj:
                         f.write(line + "\n")
-                count += 1
             else:
                 txt_path = os.path.join(output_folder, base + ".txt")
                 label = convert_xml(os.path.join(xml_folder, base + ".xml"))
                 with open(txt_path, "w") as f:
                     for line in label:
                         f.write(line + "\n")
-
+                        
 run()
