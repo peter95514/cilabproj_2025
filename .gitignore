@@ -1,2 +1,8 @@
 #venv
 venv/
+<<<<<<< HEAD
+=======
+./src/test/
+data/
+
+>>>>>>> e7c3a52 (add dicom to png_uid & copy)
