@@ -17,7 +17,7 @@ os.makedirs(img_val_dir, exist_ok= True)
 os.makedirs(txt_train_dir, exist_ok= True)
 os.makedirs(txt_val_dir, exist_ok= True)
 
-image = os.listdir(os.path.join(img_dir, "all"))
+image = [f for f in os.listdir(os.path.join(img_dir, "all")) if f.endswith(".png")]
 random.shuffle(image)
 
 ratio = 0.8
