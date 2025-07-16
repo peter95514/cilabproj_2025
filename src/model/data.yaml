@@ -1,6 +1,6 @@
 path: ../../data
-train: img/train
-val: img/val
+train: train/img
+val: val/img
 
 nc: 1
 names: ['tumor']
