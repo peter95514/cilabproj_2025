@@ -1,0 +1,6 @@
+path: ../../data
+train: img/train
+val: img/val
+
+nc: 1
+names: ['tumor']
