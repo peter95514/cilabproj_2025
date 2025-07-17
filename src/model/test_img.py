@@ -3,9 +3,9 @@ import os
 import cv2
 
 root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-img_name = os.path.join(root, "data/all/1.3.6.1.4.1.14519.5.2.1.6655.2359.112545118683956537398940148278.png")
+img_name = os.path.join(root, "data/all/images.jpg")
 
-model = YOLO(os.path.join(root, "runs/detect/lung_tumor_model_ver1.05/weights/best.pt"))
+model = YOLO(os.path.join(root, "runs/detect/lung_tumor_model_ver2.02/weights/best.pt"))
 
 results = model(img_name)
 result = results[0].plot()
