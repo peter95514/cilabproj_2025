@@ -5,10 +5,10 @@ def main():
 
     model.train(
         data = "data.yaml",
-        epochs = 50,
+        epochs = 100,
         imgsz = 512,
-        batch = 16,
-        name="lung_tumor_model_ver2.0"
+        batch = 32,
+        name="lung_tumor_model_ver2.1_100"
     )
 
     model.val()
