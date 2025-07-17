@@ -2,7 +2,7 @@ import os
 
 root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
-target_dir = os.path.join(root, "data/")
+target_dir = os.path.join(root, "data/all")
 
 obj = []
 for f in os.listdir(target_dir):
