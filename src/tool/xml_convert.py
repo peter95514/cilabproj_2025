@@ -5,7 +5,7 @@ root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 
 xml_folder = os.path.join(root, "data/xml_temp")
-png_folder = os.path.join(root, "data/temp")
+png_folder = os.path.join(root, "data/png_temp")
 output_folder = os.path.join(root, "data/output_temp")
 
 os.makedirs(output_folder, exist_ok = True)
