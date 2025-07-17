@@ -7,15 +7,11 @@ root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 img_dir = os.path.join(root, "data/")
 txt_dir = os.path.join(root, "data/")
 
-txt_train_dir = os.path.join(root, "data/txt", "train")
-txt_val_dir = os.path.join(root, "data/txt", "val")
-img_train_dir = os.path.join(root, "data/img", "train")
-img_val_dir = os.path.join(root, "data/img", "val")
+train_dir = os.path.join(root, "data", "train")
+val_dir = os.path.join(root, "data", "val")
 
-os.makedirs(img_train_dir, exist_ok= True)
-os.makedirs(img_val_dir, exist_ok= True)
-os.makedirs(txt_train_dir, exist_ok= True)
-os.makedirs(txt_val_dir, exist_ok= True)
+os.makedirs(val_dir, exist_ok= True)
+os.makedirs(train_dir, exist_ok= True)
 
 image = [f for f in os.listdir(os.path.join(img_dir, "all")) if f.endswith(".png")]
 random.shuffle(image)
@@ -27,9 +23,9 @@ train = image[:spilt_idx]
 val = image[spilt_idx:]
 
 for obj in train:
-    shutil.copyfile(os.path.join(img_dir, "all", obj), os.path.join(img_train_dir, obj))
-    shutil.copyfile(os.path.join(txt_dir, "all", obj.replace(".png", ".txt")), os.path.join(txt_train_dir, obj.replace(".png", ".txt")))
+    shutil.copyfile(os.path.join(img_dir, "all", obj), os.path.join(train_dir, obj))
+    shutil.copyfile(os.path.join(txt_dir, "all", obj.replace(".png", ".txt")), os.path.join(train_dir, obj.replace(".png", ".txt")))
 
 for obj in val:
-    shutil.copyfile(os.path.join(img_dir, "all", obj), os.path.join(img_val_dir, obj))
-    shutil.copyfile(os.path.join(txt_dir, "all", obj.replace(".png", ".txt")), os.path.join(txt_val_dir, obj.replace(".png", ".txt")))
+    shutil.copyfile(os.path.join(img_dir, "all", obj), os.path.join(val_dir, obj))
+    shutil.copyfile(os.path.join(txt_dir, "all", obj.replace(".png", ".txt")), os.path.join(val_dir, obj.replace(".png", ".txt")))
