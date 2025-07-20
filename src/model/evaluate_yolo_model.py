@@ -9,7 +9,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 MODEL_PATH = "/root/cilabproj_2025/runs/detect/lung_tumor_model_ver2.1_100/weights/best.pt"
 DATA_YAML = "data.yaml"
 TRAIN_IMAGES_DIR = os.path.join("..", "..", "data", "train", "images")
-VAL_IMAGES_DIR = os.path.join("..", "..", "data", "val", "images")
+VAL_IMAGES_DIR = "/root/cilabproj_2025/data/val"
 CONF_THRESHOLD = 0.3
 
 # === 載入模型 ===
@@ -19,13 +19,16 @@ model = YOLO(MODEL_PATH)
 train_metrics = model.val(data=DATA_YAML, split="train")
 val_metrics = model.val(data=DATA_YAML, split="val")
 
+# === 輸出評估指標（修正版） ===
 def print_metrics(name, metrics):
+    mp, mr, map50, map = metrics.box.mean_results()
+    f1 = 2 * (mp * mr) / (mp + mr + 1e-6)
+
     print(f"\n📊 [{name} Set Evaluation]")
-    print(f"mAP@0.5:        {metrics.box.map50:.4f}")
-    print(f"mAP@0.5:0.95:   {metrics.box.map:.4f}")
-    print(f"Precision:      {metrics.box.precision:.4f}")
-    print(f"Recall:         {metrics.box.recall:.4f}")
-    f1 = 2 * (metrics.box.precision * metrics.box.recall) / (metrics.box.precision + metrics.box.recall + 1e-6)
+    print(f"Precision:      {mp:.4f}")
+    print(f"Recall:         {mr:.4f}")
+    print(f"mAP@0.5:        {map50:.4f}")
+    print(f"mAP@0.5:0.95:   {map:.4f}")
     print(f"F1-score:       {f1:.4f}")
 
 print_metrics("Train", train_metrics)
@@ -53,31 +56,38 @@ for result in results:
                 cls_id = int(line.strip().split()[0])
                 y_true.append(cls_id)
 
-    # 預測
+    # 預測類別
     for box in result.boxes:
         pred_cls = int(box.cls[0])
         y_pred.append(pred_cls)
 
-# === 混淆矩陣顯示 ===
-cm = confusion_matrix(y_true, y_pred)
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=model.names)
-disp.plot(cmap="Blues")
-plt.title("Confusion Matrix (Validation Set)")
-plt.show()
+# === 混淆矩陣繪製 ===
+if y_true and y_pred:
+    cm = confusion_matrix(y_true, y_pred)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=model.names)
+    disp.plot(cmap="Blues")
+    plt.title("Confusion Matrix (Validation Set)")
+    plt.show()
+else:
+    print("⚠️ 混淆矩陣資料不足，無法生成。")
 
-# === PR Curve ===
-pr_curves = val_metrics.box.pr_curves
-plt.figure()
-for i, curve in enumerate(pr_curves):
-    precision = curve[:, 0]
-    recall = curve[:, 1]
-    plt.plot(recall, precision, label=f"{model.names[i]}")
-plt.xlabel("Recall")
-plt.ylabel("Precision")
-plt.title("Precision-Recall Curve")
-plt.grid(True)
-plt.legend()
-plt.show()
+# === Precision-Recall 曲線 ===
+if hasattr(val_metrics.box, "pr_curves"):
+    pr_curves = val_metrics.box.pr_curves
+    plt.figure()
+    for i, curve in enumerate(pr_curves):
+        if curve.shape[1] >= 2:
+            precision = curve[:, 0]
+            recall = curve[:, 1]
+            plt.plot(recall, precision, label=f"{model.names[i]}")
+    plt.xlabel("Recall")
+    plt.ylabel("Precision")
+    plt.title("Precision-Recall Curve")
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+else:
+    print("⚠️ 無法產生 PR 曲線：`pr_curves` 不存在。")
 
 # === 低信心預測分析 ===
 print("\n🧐 低信心預測框 (Confidence < 0.3):")
@@ -89,7 +99,9 @@ for result in results:
             print(f"[{os.path.basename(result.path)}] Class: {model.names[cls]}, Confidence: {conf:.2f}")
 
 # === 儲存預測結果至 CSV ===
-csv_file = "yolo_predictions.csv"
+csv_file = "results/yolo_predictions.csv"
+os.makedirs(os.path.dirname(csv_file), exist_ok=True)
+
 with open(csv_file, "w", newline="") as f:
     writer = csv.writer(f)
     writer.writerow(["Image", "Class", "Confidence", "X1", "Y1", "X2", "Y2"])
