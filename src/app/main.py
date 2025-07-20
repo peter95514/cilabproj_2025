@@ -1,13 +1,56 @@
-import tkinter as tk  # 導入 Tkinter，習慣上簡寫成 tk
+import os
+import shutil
 
-# 創建主視窗
-window = tk.Tk()
+save_number = 0
 
-# 給視窗取個名字
-window.title("我的第一個 Tkinter 視窗")
+root = __file__
+input_img_temp = os.path.join(root, "input_img_temp")
+output_img_temp = os.path.join(root, "output_img_temp")
 
-# 設置視窗大小（寬 x 高）
-window.geometry("300x200")
+os.makedirs(output_img_temp, exist_ok=True)
+os.makedirs(input_img_temp, exist_ok=True)
 
-# 進入主循環，讓視窗顯示出來
-window.mainloop()
+def transfer():
+
+    return
+
+def upload_img(path):
+    
+    obj = os.path.basename(path)
+    ext = os.path.splitext(obj)[1].lower()
+
+    if ext not in [".png", ".jpg"]:
+        return "its not img"
+    
+    con = True
+
+    for file in os.listdir(input_img_temp):
+        if (os.path.basename(file) == os.path.basename(path)):
+            con = False
+            break
+
+    if con:
+        return
+
+    shutil.copyfile(path, os.path.join(output_img_temp, os.path.basename(path))) 
+    transfer()
+    return
+
+def upload_dir(path):
+
+    for file in os.listdir(path):
+        upload_img(file)
+    
+    transfer()
+    return 
+
+def main():
+    
+    #finish
+    shutil.rmtree(input_img_temp)
+    shutil.rmtree(output_img_temp)
+
+    return
+
+if __name__ == "__main__":
+    main()
