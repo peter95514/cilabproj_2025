@@ -5,10 +5,14 @@ def main():
 
     model.train(
         data = "data.yaml",
-        epochs = 100,
+        epochs = 150,
         imgsz = 512,
         batch = 32,
-        name="lung_tumor_model_ver2.1_100"
+        device = 0,  # 明確指定用外顯
+        workers = 8,
+        optimizer = "Adam",
+        cache = "disk",
+        name = "lung_tumor_model_ver3.1_150_32_else"
     )
 
     model.val()

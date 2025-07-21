@@ -1,14 +1,11 @@
 import os
 import csv
-import numpy as np
 import matplotlib.pyplot as plt
 from ultralytics import YOLO
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 # === 基本設定 ===
-MODEL_PATH = "/root/cilabproj_2025/runs/detect/lung_tumor_model_ver2.1_100/weights/best.pt"
+MODEL_PATH = "/root/cilabproj_2025/runs/detect/lung_tumor_model_ver3.1_150_32_else/weights/best.pt"
 DATA_YAML = "data.yaml"
-TRAIN_IMAGES_DIR = os.path.join("..", "..", "data", "train", "images")
 VAL_IMAGES_DIR = "/root/cilabproj_2025/data/val"
 CONF_THRESHOLD = 0.3
 
@@ -19,7 +16,7 @@ model = YOLO(MODEL_PATH)
 train_metrics = model.val(data=DATA_YAML, split="train")
 val_metrics = model.val(data=DATA_YAML, split="val")
 
-# === 輸出評估指標（修正版） ===
+# === 輸出評估指標 ===
 def print_metrics(name, metrics):
     mp, mr, map50, map = metrics.box.mean_results()
     f1 = 2 * (mp * mr) / (mp + mr + 1e-6)
@@ -40,54 +37,8 @@ def load_images_from_dir(img_dir):
 
 val_images = load_images_from_dir(VAL_IMAGES_DIR)
 
-# === 模型預測驗證集 ===
-results = model(val_images)
-
-# === 混淆矩陣資料收集 ===
-y_true = []
-y_pred = []
-
-for result in results:
-    # 真實標註
-    label_path = result.path.replace("images", "labels").replace(".png", ".txt")
-    if os.path.exists(label_path):
-        with open(label_path, "r") as f:
-            for line in f:
-                cls_id = int(line.strip().split()[0])
-                y_true.append(cls_id)
-
-    # 預測類別
-    for box in result.boxes:
-        pred_cls = int(box.cls[0])
-        y_pred.append(pred_cls)
-
-# === 混淆矩陣繪製 ===
-if y_true and y_pred:
-    cm = confusion_matrix(y_true, y_pred)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=model.names)
-    disp.plot(cmap="Blues")
-    plt.title("Confusion Matrix (Validation Set)")
-    plt.show()
-else:
-    print("⚠️ 混淆矩陣資料不足，無法生成。")
-
-# === Precision-Recall 曲線 ===
-if hasattr(val_metrics.box, "pr_curves"):
-    pr_curves = val_metrics.box.pr_curves
-    plt.figure()
-    for i, curve in enumerate(pr_curves):
-        if curve.shape[1] >= 2:
-            precision = curve[:, 0]
-            recall = curve[:, 1]
-            plt.plot(recall, precision, label=f"{model.names[i]}")
-    plt.xlabel("Recall")
-    plt.ylabel("Precision")
-    plt.title("Precision-Recall Curve")
-    plt.grid(True)
-    plt.legend()
-    plt.show()
-else:
-    print("⚠️ 無法產生 PR 曲線：`pr_curves` 不存在。")
+# === 模型預測驗證集（stream=True 省記憶體）===
+results = list(model(val_images, stream=True))
 
 # === 低信心預測分析 ===
 print("\n🧐 低信心預測框 (Confidence < 0.3):")
@@ -113,4 +64,22 @@ with open(csv_file, "w", newline="") as f:
             writer.writerow([os.path.basename(result.path), model.names[cls], conf, x1, y1, x2, y2])
 
 print(f"\n✅ 已將預測結果儲存至 {csv_file}")
+
+# === PR Curve ===
+if hasattr(val_metrics.box, "pr_curves"):
+    pr_curves = val_metrics.box.pr_curves
+    plt.figure()
+    for i, curve in enumerate(pr_curves):
+        if curve.shape[1] >= 2:
+            precision = curve[:, 0]
+            recall = curve[:, 1]
+            plt.plot(recall, precision, label=f"{model.names[i]}")
+    plt.xlabel("Recall")
+    plt.ylabel("Precision")
+    plt.title("Precision-Recall Curve")
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+else:
+    print("⚠️ 無法產生 PR 曲線：`pr_curves` 不存在。")
 
