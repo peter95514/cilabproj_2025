@@ -1,5 +1,6 @@
 import os
 import shutil
+import window
 
 save_number = 0
 
@@ -45,6 +46,8 @@ def upload_dir(path):
     return 
 
 def main():
+
+    create_tk()
     
     #finish
     shutil.rmtree(input_img_temp)
