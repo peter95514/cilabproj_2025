@@ -1,7 +1,7 @@
 import os
 import shutil
-source_dir = r"C:\Users\wu096\OneDrive\桌面\轉好的圖_UID命名"
-output_dir = r"\\wsl.localhost\Ubuntu-22.04\root\cilabproj_2025\data\temp"
+source_dir = r"C:\Users\wu096\OneDrive\桌面\DICOM_UID"
+output_dir = r"\\wsl.localhost\Ubuntu-22.04\root\cilabproj_2025\data\png_temp_1"
 
 os.makedirs(output_dir, exist_ok=True)
 
